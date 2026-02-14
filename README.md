@@ -5,8 +5,8 @@ Este repositorio corresponde al **Grupo 11 de Software de Automatización**, den
 Aquí se desarrollarán proyectos, prácticas y ejemplos relacionados con el área de la automatización y la ingeniería de software.
 
 ## 👥 Integrantes
-- **Julian Quimbayo**  
-- **Carlos Torres**
+- **Álvaro Augusto Andrade Quesada**  
+- **José Julián Briñez**
 
 ## 🎓 Programa Académico
 Este trabajo pertenece al **Programa de Ingeniería Mecatrónica**.
