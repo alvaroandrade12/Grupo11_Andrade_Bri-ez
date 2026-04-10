@@ -1,0 +1,689 @@
+{
+  "name": "Soporte Inteligente - Anthropic AI",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "soporte-inteligente",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "9901d9cd-7652-4d9b-af43-e0b4cff3e93f",
+      "name": "Webhook",
+      "webhookId": "d336c773-7158-47d5-9055-a113f028c26e"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "7e1c5e4d-9ded-4669-96dd-0c546c9b912d",
+              "leftValue": "={{ $json.body.email }}",
+              "rightValue": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            },
+            {
+              "id": "2ee1655c-fb9e-47bf-813f-4fbbb53637e2",
+              "leftValue": "={{ $json.body.nombre }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "5071fb14-22f1-4190-9df4-90abc6810806",
+              "leftValue": "={{ $json.body.nombre }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "0c9e64c1-38b0-4d33-9a42-5df6772a33c0",
+      "name": "Condición 1 — Email válido (Regex):"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"ticket_id\": \"={{ 'TK-' + $now.toFormat('yyyyMMdd') + '-' + Math.floor(Math.random() * 9000 + 1000) }}\",\n  \"fecha\": \"={{ $now.toFormat('dd/MM/yyyy HH:mm:ss') }}\",\n  \"nombre\": \"={{ $json.body.nombre }}\",\n  \"email\": \"={{ $json.body.email }}\",\n  \"asunto\": \"={{ $json.body.asunto || 'Sin asunto' }}\",\n  \"mensaje\": \"={{ $json.body.mensaje }}\",\n  \"prioridad\": \"={{ $json.body.prioridad || 'media' }}\",\n  \"ip_origen\": \"={{ $json.headers?.['x-forwarded-for'] || 'Local' }}\",\n  \"estado\": \"NUEVO\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        416,
+        -64
+      ],
+      "id": "313c76c7-c91c-41a1-8f11-0a34007d2277",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "$json.text",
+                    "rightValue": "=={{ JSON.parse($json.content[0].text).categoria }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "regex"
+                    },
+                    "id": "5065d620-c9c6-41cb-b880-b81dee3ec1d7"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "ec49dc72-ef2f-47b9-aadb-eaac7d3c1208",
+                    "leftValue": "equals",
+                    "rightValue": "TÉCNICO",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "a82b9e15-c961-4c10-baa1-ca9da5520cac",
+                    "leftValue": "equals",
+                    "rightValue": "FACTURACIÓN",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "4ba13e83-52fc-43ba-be5d-cf494d91b6d5",
+                    "leftValue": "equals",
+                    "rightValue": "QUEJA",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        944,
+        -112
+      ],
+      "id": "a98b591e-d323-4ed9-a711-e04bb438d796",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"ticket_id\": \"={{ $('Edit Fields').item.json.ticket_id }}\",\n  \"fecha\": \"={{ $('Edit Fields').item.json.fecha }}\",\n  \"nombre\": \"={{ $('Edit Fields').item.json.nombre }}\",\n  \"email\": \"={{ $('Edit Fields').item.json.email }}\",\n  \"asunto\": \"={{ $('Edit Fields').item.json.asunto }}\",\n  \"mensaje\": \"={{ $('Edit Fields').item.json.mensaje }}\",\n  \"prioridad_usuario\": \"={{ $('Edit Fields').item.json.prioridad }}\",\n  \"analisis_ia\": \"={{ $json.content ? JSON.parse($json.content[0].text) : JSON.parse($json.text) }}\",\n  \"categoria_ia\": \"={{ $json.content ? JSON.parse($json.content[0].text).categoria : JSON.parse($json.text).categoria }}\",\n  \"sentimiento_ia\": \"={{ $json.content ? JSON.parse($json.content[0].text).sentimiento : JSON.parse($json.text).sentimiento }}\",\n  \"urgencia_ia\": \"={{ $json.content ? JSON.parse($json.content[0].text).urgencia : JSON.parse($json.text).urgencia }}\",\n  \"resumen_ia\": \"={{ $json.content ? JSON.parse($json.content[0].text).resumen : JSON.parse($json.text).resumen }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1152,
+        -64
+      ],
+      "id": "9fa7cbc8-8f67-4ec3-b0f5-7d75d2afe116",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "sendTo": "=\n{{ $('Webhook').item.json.body.email }}",
+        "subject": "==[{{ $('Edit Fields1').item.json.ticket_id }}] Respuesta a: {{ $('Edit Fields1').item.json.asunto }}",
+        "message": "=<!DOCTYPE html>\n<html lang=\"es\">\n<head><meta charset=\"UTF-8\"></head>\n<body style=\"font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #ffffff; margin: 0; padding: 20px;\">\n  <div style=\"max-width: 600px; margin: 0 auto; padding: 30px; border-left: 4px solid #2196F3;\">\n    \n    <div style=\"background-color: #e3f2fd; padding: 15px; border-radius: 5px; margin-bottom: 20px;\">\n      <p style=\"margin: 0; color: #1565c0; font-size: 13px;\">\n        🎫 Ticket: <strong>{{ $('Edit Fields1').item.json.ticket_id }}</strong> | \n        Categoría: <strong>{{ $('Edit Fields1').item.json.categoria_ia }}</strong> |\n        Prioridad: <strong>{{ $('Edit Fields1').item.json.urgencia_ia }}</strong>\n      </p>\n    </div>\n\n    <h2 style=\"color: #333; margin-top: 0;\">Hola {{ $('Edit Fields1').item.json.nombre }}, hemos recibido tu solicitud</h2>\n    \n    <div style=\"background-color: #f5f5f5; padding: 20px; border-radius: 5px; margin: 20px 0;\">\n      <p style=\"color: #555; font-size: 15px; line-height: 1.8; margin: 0; white-space: pre-wrap;\">{{ $json.content ? $json.content[0].text : $json.text }}</p>\n    </div>\n\n    <div style=\"border-top: 1px solid #e0e0e0; padding-top: 15px; margin-top: 20px;\">\n      <p style=\"color: #999; font-size: 12px;\">\n        📅 Fecha: {{ $('Edit Fields1').item.json.fecha }}<br>\n        Este mensaje fue generado automáticamente por nuestro sistema de soporte inteligente.<br>\n        Si necesitas asistencia adicional, responde a este correo con tu número de ticket.\n      </p>\n    </div>\n\n  </div>\n</body>\n</html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1696,
+        -192
+      ],
+      "id": "e5dd91d6-91ee-48d8-a577-c94b05627c42",
+      "name": "Send a message1",
+      "webhookId": "a020d093-9f01-40e2-9d67-053486cfe235",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "bzuJ1Us9nWK3KFKW",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/19kuLGwSOXhvPUrFi-CtkuAMIrUpaR3m3WMnvMhsLSss/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19kuLGwSOXhvPUrFi-CtkuAMIrUpaR3m3WMnvMhsLSss/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Fecha": "={{ $('Edit Fields1').item.json.fecha }}",
+            "ID": "={{ $('Edit Fields1').item.json.ticket_id }}",
+            "Nombre": "={{ $('Edit Fields1').item.json.nombre }}",
+            "Asunto": "={{ $('Edit Fields1').item.json.asunto }}",
+            "Email": "={{ $('Edit Fields1').item.json.email }}",
+            "Mensaje": "={{ $('Edit Fields1').item.json.mensaje }}",
+            "Categoría IA ": "={{ $('Edit Fields1').item.json.categoria_ia }}",
+            "Sentimiento": "={{ $('Edit Fields1').item.json.sentimiento_ia }}",
+            "Urgencia": "={{ $('Edit Fields1').item.json.urgencia_ia }}",
+            "Respuesta IA": "={{ $('Basic LLM Chain').item.json.text }}",
+            "Estado": "RESPONDIDO_IA"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Nombre",
+              "displayName": "Nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Asunto",
+              "displayName": "Asunto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Mensaje",
+              "displayName": "Mensaje",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Categoría IA ",
+              "displayName": "Categoría IA ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Sentimiento",
+              "displayName": "Sentimiento",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Urgencia",
+              "displayName": "Urgencia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Respuesta IA",
+              "displayName": "Respuesta IA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1792,
+        96
+      ],
+      "id": "2fdcb6d8-9f63-4c55-806f-a5890e4b62b7",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Yx0yOEhxBFcm0G3r",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Asunto: {{ $json.asunto }}\nMensaje: {{ $json.mensaje }}\nPrioridad: {{ $json.prioridad }}\n\nRespuesta: Responde únicamente con el nombre de la categoría.",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Eres un asistente de clasificación de tickets de soporte técnico.  Analiza el ticket y responde ÚNICAMENTE con un JSON válido, sin explicaciones adicionales.  El JSON debe tener exactamente esta estructura: {   \"categoria\": \"TÉCNICO\" \n \"FACTURACIÓN\" \n \"CONSULTA_GENERAL\" \n \"QUEJA\" \n \"SOLICITUD\",   \"sentimiento\": \"POSITIVO\" \n \"NEUTRO\" \n \"NEGATIVO\" \n \"FRUSTRADO\",   \"urgencia\": \"BAJA\" \n \"MEDIA\" \n \"ALTA\" \n \"CRÍTICA\",   \"resumen\": \"Resumen de máximo 50 palabras del problema\",   \"palabras_clave\": [\"palabra1\", \"palabra2\", \"palabra3\"] }"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        624,
+        48
+      ],
+      "id": "7b666da8-a2cb-4af7-ac7f-6d0abe2de592",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-sonnet-4-20250514",
+          "mode": "id"
+        },
+        "options": {
+          "maxTokensToSample": 500,
+          "temperature": 0.1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        688,
+        288
+      ],
+      "id": "a6e3368f-37a5-4e64-8a47-e95d146b82dd",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "QHWVr2mx9HIBqlYk",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "Genera una respuesta para este ticket:\n\nTicket ID: {{ $json.ticket_id }}\nCliente: {{ $json.nombre }}\nAsunto: {{ $json.asunto }}\nMensaje original: {{ $json.mensaje }}\n\nAnálisis del ticket:\n- Categoría: {{ $json.categoria_ia }}\n- Sentimiento del cliente: {{ $json.sentimiento_ia }}\n- Urgencia: {{ $json.urgencia_ia }}\n- Resumen: {{ $json.resumen_ia }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Eres un agente de soporte al cliente profesional, amigable y empático. Genera una respuesta para el cliente basándote en su ticket de soporte.  Reglas: - Saluda al cliente por su nombre - Muestra empatía si el sentimiento es negativo o frustrado - Ofrece pasos concretos de solución o siguiente acción - Incluye el número de ticket para referencia - Mantén un tono profesional pero cercano - Responde en español - Máximo 200 palabras - NO uses markdown, responde en texto plano"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1360,
+        -192
+      ],
+      "id": "5d524733-a2d1-49df-baf7-0c0cf8a8bf36",
+      "name": "Basic LLM Chain1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-sonnet-4-20250514",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        1376,
+        16
+      ],
+      "id": "ffa86be8-4129-4d56-8ff1-309428764786",
+      "name": "Anthropic Chat Model1",
+      "credentials": {
+        "anthropicApi": {
+          "id": "QHWVr2mx9HIBqlYk",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "alvaritolol45@gmail.com",
+        "subject": "=[SOPORTE IA] {{ $('Edit Fields1').item.json.urgencia_ia }} - {{ $('Edit Fields1').item.json.categoria_ia }} | {{ $('Edit Fields1').item.json.ticket_id }}",
+        "message": "=<!DOCTYPE html>\n<html lang=\"es\">\n<head><meta charset=\"UTF-8\"></head>\n<body style=\"font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #ffffff; margin: 0; padding: 20px;\">\n  <div style=\"max-width: 650px; margin: 0 auto; padding: 30px;\">\n    \n    <div style=\"background-color: #fff3e0; padding: 15px; border-radius: 5px; border-left: 4px solid #ff9800; margin-bottom: 20px;\">\n      <h2 style=\"margin: 0; color: #e65100; font-size: 18px;\">🤖 Nuevo Ticket Analizado por IA</h2>\n    </div>\n\n    <table style=\"width: 100%; border-collapse: collapse; margin: 20px 0;\">\n      <tr style=\"background-color: #f5f5f5;\">\n        <td style=\"padding: 10px; font-weight: bold; width: 150px; border: 1px solid #e0e0e0;\">🎫 Ticket</td>\n        <td style=\"padding: 10px; border: 1px solid #e0e0e0;\">{{ $('Edit Fields1').item.json.ticket_id }}</td>\n      </tr>\n      <tr>\n        <td style=\"padding: 10px; font-weight: bold; border: 1px solid #e0e0e0;\">👤 Cliente</td>\n        <td style=\"padding: 10px; border: 1px solid #e0e0e0;\">{{ $('Edit Fields1').item.json.nombre }} ({{ $('Edit Fields1').item.json.email }})</td>\n      </tr>\n      <tr style=\"background-color: #f5f5f5;\">\n        <td style=\"padding: 10px; font-weight: bold; border: 1px solid #e0e0e0;\">📋 Asunto</td>\n        <td style=\"padding: 10px; border: 1px solid #e0e0e0;\">{{ $('Edit Fields1').item.json.asunto }}</td>\n      </tr>\n      <tr>\n        <td style=\"padding: 10px; font-weight: bold; border: 1px solid #e0e0e0;\">🤖 Categoría IA</td>\n        <td style=\"padding: 10px; border: 1px solid #e0e0e0; font-weight: bold; color: #1565c0;\">{{ $('Edit Fields1').item.json.categoria_ia }}</td>\n      </tr>\n      <tr style=\"background-color: #f5f5f5;\">\n        <td style=\"padding: 10px; font-weight: bold; border: 1px solid #e0e0e0;\">😊 Sentimiento</td>\n        <td style=\"padding: 10px; border: 1px solid #e0e0e0;\">{{ $('Edit Fields1').item.json.sentimiento_ia }}</td>\n      </tr>\n      <tr>\n        <td style=\"padding: 10px; font-weight: bold; border: 1px solid #e0e0e0;\">⚡ Urgencia</td>\n        <td style=\"padding: 10px; border: 1px solid #e0e0e0; font-weight: bold; color: #c62828;\">{{ $('Edit Fields1').item.json.urgencia_ia }}</td>\n      </tr>\n    </table>\n\n    <h3 style=\"color: #333; margin-top: 25px;\">📝 Mensaje Original</h3>\n    <div style=\"background-color: #fafafa; padding: 15px; border-radius: 5px; border-left: 3px solid #ccc;\">\n      <p styl{{ $('Condición 1 — Email válido (Regex):').item.json.body }}e=\"color: #555; line-height: 1.7; margin: 0;\">{{ $('Edit Fields1').item.json.mensaje }}</p>\n    </div>\n\n    <h3 style=\"color: #333; margin-top: 25px;\">💬 Respuesta Enviada al Cliente (generada por IA)</h3>\n    <div style=\"background-color: #e8f5e9; padding: 15px; border-radius: 5px; border-left: 3px solid #4caf50;\">\n      <p style=\"color: #2e7d32; line-height: 1.7; margin: 0;\">{{ $json.content ? $json.content[0].text : $json.text }}</p>\n    </div>\n\n    <p style=\"color: #999; font-size: 12px; margin-top: 25px; border-top: 1px solid #e0e0e0; padding-top: 15px;\">\n      ⏰ Procesado: {{ $('Edit Fields1').item.json.fecha }} | Sistema de Soporte Inteligente con Anthropic Claude\n    </p>\n    \n  </div>\n</body>\n</html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1856,
+        -144
+      ],
+      "id": "252d5853-f96e-498f-8185-8cccae20c365",
+      "name": "Send a message",
+      "webhookId": "603ab506-7edc-4f0e-9be7-a06b0ff4b50a",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "bzuJ1Us9nWK3KFKW",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Condición 1 — Email válido (Regex):",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Condición 1 — Email válido (Regex):": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message1": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        []
+      ]
+    },
+    "Anthropic Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain1": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "668a3f38-0b4f-4556-9edd-fd6c5dcebe60",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5110469c20623e5f5061375bc4110ed5f7e7f975d8f6a0dbe37eae6a0b85f4d5"
+  },
+  "id": "iw2OpEp6Zee86cR3",
+  "tags": []
+}
