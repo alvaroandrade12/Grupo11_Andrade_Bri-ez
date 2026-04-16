@@ -1,0 +1,181 @@
+{
+  "name": "Tool - Analizar Factura",
+  "nodes": [
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "claude-sonnet-4-20250514",
+          "mode": "list",
+          "cachedResultName": "claude-sonnet-4-20250514"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "Eres un experto en análisis de facturas y documentos contables. \nTu tarea es extraer datos estructurados de facturas.\n\nSIEMPRE responde en formato JSON válido con esta estructura exacta:\n{\n  \"proveedor\": \"nombre del proveedor o empresa emisora\",\n  \"numero_factura\": \"número o código de la factura\",\n  \"fecha\": \"YYYY-MM-DD\",\n  \"items\": [\n    {\"descripcion\": \"...\", \"cantidad\": 0, \"precio_unitario\": 0, \"subtotal\": 0}\n  ],\n  \"subtotal\": 0,\n  \"impuestos\": 0,\n  \"total\": 0,\n  \"moneda\": \"COP o USD o EUR\",\n  \"notas\": \"cualquier observación relevante\"\n}\n\nSi algún campo no está claro en el documento, usa \"No especificado\" para texto o 0 para números.\nResponde SOLO con el JSON, sin texto adicional.",
+              "role": "assistant"
+            },
+            {
+              "content": "=Analiza el siguiente texto extraído de una factura y extrae todos los datos estructurados:\n\n{{ $json.text }}"
+            }
+          ]
+        },
+        "options": {
+          "maxTokens": 2000
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.anthropic",
+      "typeVersion": 1,
+      "position": [
+        928,
+        32
+      ],
+      "id": "013f2ff1-b214-4344-86a2-d4eff93af088",
+      "name": "Message a model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "vVv1hqDa6E68buaZ",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8ca4090a-5fcc-42a9-b476-48f3b7931427",
+              "name": "response",
+              "value": "=\t={{ $json.message.content[0].text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1280,
+        32
+      ],
+      "id": "95053470-7105-4e2f-8993-d963008173da",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        160,
+        48
+      ],
+      "id": "863c372c-5509-4347-b180-33d8b4a28fe1",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        704,
+        48
+      ],
+      "id": "7d29b92e-ca14-4635-8874-0ebba20e9c79",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.query }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        384,
+        48
+      ],
+      "id": "25b98807-1372-40d2-9bea-36844d327b15",
+      "name": "HTTP Request1"
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "query": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "a6db9f18-7378-4bfd-a6ee-14c2f3ff108d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "45de9c1d74272048b80b13f5c012c9ad1e541451a6cbe5fa57fde1c587e6e561"
+  },
+  "id": "RTWtPRqpJnoeqEr3",
+  "tags": []
+}
